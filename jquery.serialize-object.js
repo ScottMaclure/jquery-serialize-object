@@ -7,23 +7,8 @@
  */
 (function(root, factory) {
 
-  // AMD
-  if (typeof define === "function" && define.amd) {
-    define(["jquery", "exports"], function($, exports) {
-      factory(root, exports, $);
-    });
-  }
-
-  // CommonJS
-  else if (typeof exports !== "undefined") {
-    var $ = require("jquery");
-    factory(root, exports, $);
-  }
-
-  // Browser
-  else {
-    root.FormSerializer = factory(root, {}, (root.jQuery || root.Zepto || root.ender || root.$));
-  }
+  // Browser ONLY
+  root.FormSerializer = factory(root, {}, (root.jQuery || root.Zepto || root.ender || root.$));
 
 }(this, function(root, exports, $) {
 
