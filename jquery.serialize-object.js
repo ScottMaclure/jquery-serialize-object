@@ -3,24 +3,24 @@
  * @copyright 2014, macek <paulmacek@gmail.com>
  * @link https://github.com/macek/jquery-serialize-object
  * @license BSD
- * @version 2.3.2
+ * @version 2.4.2
  */
 (function(root, factory) {
 
   // Browser ONLY
-  root.FormSerializer = factory(root, {}, (root.jQuery || root.Zepto || root.ender || root.$));
+  factory(root, (root.jQuery || root.Zepto || root.ender || root.$));
 
-}(this, function(root, exports, $) {
+}(this, function(exports, $) {
 
   var patterns = {
-    validate: /^[a-z][a-z0-9_]*(?:\[(?:\d*|[a-z0-9_]+)\])*$/i,
+    validate: /^[a-z_][a-z0-9_]*(?:\[(?:\d*|[a-z0-9_]+)\])*$/i,
     key:      /[a-z0-9_]+|(?=\[\])/gi,
     push:     /^$/,
     fixed:    /^\d+$/,
     named:    /^[a-z0-9_]+$/i
   };
 
-  function FormSerializer(helper) {
+  function FormSerializer(helper, $form) {
 
     // private variables
     var data     = {},
@@ -65,9 +65,18 @@
       return pushes[key]++;
     }
 
+    function encode(pair) {
+      switch ($('[name="' + pair.name + '"]', $form).attr("type")) {
+        case "checkbox":
+          return pair.value === "on" ? true : pair.value;
+        default:
+          return pair.value;
+      }
+    }
+
     function addPair(pair) {
       if (!patterns.validate.test(pair.name)) return this;
-      var obj = makeObject(pair.name, pair.value);
+      var obj = makeObject(pair.name, encode(pair));
       data = helper.extend(true, data, obj);
       return this;
     }
@@ -103,7 +112,7 @@
     if (this.length > 1) {
       return new Error("jquery-serialize-object can only serialize one form at a time");
     }
-    return new FormSerializer($).
+    return new FormSerializer($, this).
       addPairs(this.serializeArray()).
       serialize();
   };
@@ -112,7 +121,7 @@
     if (this.length > 1) {
       return new Error("jquery-serialize-object can only serialize one form at a time");
     }
-    return new FormSerializer($).
+    return new FormSerializer($, this).
       addPairs(this.serializeArray()).
       serializeJSON();
   };
